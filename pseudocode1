@@ -1,0 +1,117 @@
+.data
+	prompt:    .asciiz "Digite n a seguir: "
+	n:         .word 0
+		
+	
+.text
+	.globl main
+	main:
+		
+		#imprime o prompt
+		li $v0, 4
+		la $a0, prompt
+		syscall
+		
+		
+		#pega o n do imput
+		li $v0, 5
+		syscall
+		
+		
+		#guarda o imput em n, depois em $a0
+		sw $v0, n
+		lw $a0, n
+		
+		
+		#seta $s1 em 100
+		addi $s1, $zero, 0
+		addi $s1, $s1, 100
+		
+ 		
+ 		#compara n <= 100
+		slt  $t1,$s1,$a0      # t1 é true se n > 100
+		#seta $t2 em  100
+		addi $t2, $zero, 0
+		addi $t2, $t2, 100
+		bne  $t1,$zero,exit   # se n >= 100, pula pra exit com $t2 = 100 (n maior que 100)
+		
+		
+		#seta $s1 em 0
+		addi $s1, $zero, 0
+		
+				 		
+		#compara n < 0
+		slt  $t1,$a0,$s1      # t1 é true se n < 0
+		#seta $t2 em  -1
+		addi $t2, $zero, 0
+		addi $t2, $t2, -1
+		bne  $t1,$zero,exit   # se n < 0, pula pra exit com $t2 = -1 (n menor que 1)
+		
+		
+		#MAIN:
+		#seta $s1 em 0 (para ser o b)
+		addi $s1, $zero, 0
+		
+		#seta $s2 em 0 (para ser o i)
+		addi $s2, $zero, 0
+		addi $s2, $s1, 0
+		
+		#seta $s3 em 9 (para ser o a variavel de controle)
+		addi $s3, $zero, 0
+		addi $s3, $s1, 9
+		
+		
+		#a = $a0, b = $s1, i = $s2, controle = $s3
+		# a = n   b = 0    i = 0    controle = 9
+		
+		loop:
+			beq $s2, $s3, exitb   #pula pra exitb se i = 9
+			mult $s2, $s2         #salva em mfhi o resultado de i*i]
+			addi $s5, $zero, 0    #zera o $s5
+			mflo $s5              #salva o resultado em $s5
+			beq $s5, $a0, exita   #pula pra exita se i*i = a
+			addi $s2, $s2, 1
+			blt $s2, $s3, loop
+			beq $s2, $s3, exitb   #pula pra exitb se i = 9
+			
+		
+		
+		#FIM DO MAIN
+		
+		
+		exita:
+			add $s4, $a0, $zero #salva a em $s4 (STORE A)
+			#seta $t2 em  1
+			addi $t2, $zero, 0
+			addi $t2, $t2, 1
+			j exit
+		
+		exitb:
+			#seta $t2 em  -100 (erro)
+			addi $t2, $zero, 0
+			addi $t2, $t2, -100
+			add $s4, $s1, $zero
+			bne $s1, $zero, exit #pula pra exit se b != 0, com $t2 = -100
+			#seta $t2 em  2
+			addi $t2, $zero, 0
+			addi $t2, $t2, 2
+			add $s4, $s1, $zero  #salva b em $s4 (STORE B)
+			j exit #pula pra exit com $t2 = 2
+			
+		
+		
+		exit:
+		
+		
+		#imprime se i*i nunca foi igual a A e B era diferente de 0 (erro: -100), se n menor que 0 (-1), STORE A (1), STORE B (2) ou se n era maior que 100 (100).
+		
+		li $v0, 1
+		la $a0, ($t2)
+		syscall	
+		
+		
+		#Avisa que acabou de rodar
+		li $v0, 10
+		syscall
+		
+		
